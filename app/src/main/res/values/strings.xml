@@ -1,0 +1,69 @@
+<resources>
+    <string name="app_name">Dynamic QRIS</string>
+
+    <!-- Auth / Biometric -->
+    <string name="auth_title">Buka Dynamic QRIS</string>
+    <string name="auth_subtitle">Verifikasi identitas Anda untuk melanjutkan</string>
+    <string name="auth_negative_button">Batal</string>
+    <string name="auth_unlock">Buka</string>
+    <string name="auth_no_biometric">Perangkat tidak mendukung biometrik. Aktifkan kunci layar di pengaturan.</string>
+    <string name="auth_failed">Autentikasi gagal. Coba lagi.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Beranda</string>
+    <string name="nav_history">Riwayat</string>
+    <string name="nav_create">Buat Transaksi</string>
+
+    <!-- Create transaction -->
+    <string name="create_title">Buat Transaksi Baru</string>
+    <string name="create_amount">Jumlah (Rp)</string>
+    <string name="create_external_id">External ID (opsional)</string>
+    <string name="create_external_id_helper">Kosongkan untuk auto-generate</string>
+    <string name="create_expiry_minutes">Berlaku (menit)</string>
+    <string name="create_submit">Buat QRIS</string>
+    <string name="create_amount_required">Jumlah wajib diisi</string>
+    <string name="create_amount_min">Jumlah minimal Rp 1.000</string>
+
+    <!-- QR display -->
+    <string name="qr_title">Tunggu Pembayaran</string>
+    <string name="qr_amount_label">Jumlah Pembayaran</string>
+    <string name="qr_status_pending">Menunggu pembayaran…</string>
+    <string name="qr_status_success">Pembayaran Berhasil!</string>
+    <string name="qr_status_expired">QRIS Kedaluwarsa</string>
+    <string name="qr_status_cancelled">Transaksi Dibatalkan</string>
+    <string name="qr_cancel">Batalkan Transaksi</string>
+    <string name="qr_back">Kembali</string>
+    <string name="qr_cancel_confirm_title">Batalkan transaksi?</string>
+    <string name="qr_cancel_confirm_message">Setelah dibatalkan, QRIS tidak bisa digunakan lagi. Pembayaran yang masuk akan ditolak.</string>
+    <string name="qr_cancel_confirm_yes">Ya, batalkan</string>
+    <string name="qr_cancel_confirm_no">Tidak</string>
+    <string name="qr_expires_in">Kedaluwarsa dalam %1$s</string>
+
+    <!-- History -->
+    <string name="history_title">Riwayat Transaksi</string>
+    <string name="history_empty">Belum ada transaksi</string>
+    <string name="history_filter_all">Semua</string>
+    <string name="history_filter_pending">Menunggu</string>
+    <string name="history_filter_success">Berhasil</string>
+    <string name="history_filter_expired">Kedaluwarsa</string>
+    <string name="history_filter_cancelled">Dibatalkan</string>
+
+    <!-- Detail -->
+    <string name="detail_title">Detail Transaksi</string>
+    <string name="detail_external_id">External ID</string>
+    <string name="detail_amount_requested">Jumlah Diminta</string>
+    <string name="detail_unique_code">Kode Unik</string>
+    <string name="detail_amount_total">Total Dibayar</string>
+    <string name="detail_status">Status</string>
+    <string name="detail_payment_provider">Provider Pembayaran</string>
+    <string name="detail_created_at">Dibuat</string>
+    <string name="detail_expires_at">Kedaluwarsa</string>
+    <string name="detail_paid_at">Dibayar</string>
+    <string name="detail_cancelled_at">Dibatalkan</string>
+
+    <!-- Common -->
+    <string name="error_network">Tidak bisa terhubung ke server. Periksa koneksi Anda.</string>
+    <string name="error_unknown">Terjadi kesalahan. Coba lagi nanti.</string>
+    <string name="retry">Coba Lagi</string>
+    <string name="loading">Memuat…</string>
+</resources>
