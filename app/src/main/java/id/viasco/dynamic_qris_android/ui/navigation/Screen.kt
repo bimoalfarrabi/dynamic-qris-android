@@ -12,4 +12,5 @@ sealed class Screen(val route: String) {
         const val ARG_TRANSACTION_ID = "transactionId"
         fun createRoute(id: String) = "detail/$id"
     }
+    data object ConnectionStatus : Screen("connection-status")
 }

@@ -11,6 +11,7 @@ import id.viasco.dynamic_qris_android.ui.create.CreateTransactionScreen
 import id.viasco.dynamic_qris_android.ui.detail.TransactionDetailScreen
 import id.viasco.dynamic_qris_android.ui.history.HistoryScreen
 import id.viasco.dynamic_qris_android.ui.qr.QrDisplayScreen
+import id.viasco.dynamic_qris_android.ui.status.ConnectionStatusScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -28,6 +29,7 @@ fun AppNavHost(navController: NavHostController) {
                         navController.navigate(Screen.Detail.createRoute(trx.id))
                     }
                 },
+                onStatusClick = { navController.navigate(Screen.ConnectionStatus.route) },
             )
         }
 
@@ -62,6 +64,12 @@ fun AppNavHost(navController: NavHostController) {
             ),
         ) {
             TransactionDetailScreen(
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Screen.ConnectionStatus.route) {
+            ConnectionStatusScreen(
                 onBack = { navController.popBackStack() },
             )
         }

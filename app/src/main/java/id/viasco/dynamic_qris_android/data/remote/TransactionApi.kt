@@ -25,4 +25,8 @@ interface TransactionApi {
 
     @POST("transactions/{id}/cancel")
     suspend fun cancel(@Path("id") id: String): SingleResponse<TransactionDto>
+
+    /** Simple ping to verify backend connectivity. */
+    @GET("health")
+    suspend fun health()
 }
