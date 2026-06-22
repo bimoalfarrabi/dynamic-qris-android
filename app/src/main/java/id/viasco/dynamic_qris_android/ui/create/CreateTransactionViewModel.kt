@@ -81,8 +81,8 @@ class CreateTransactionViewModel @Inject constructor(
     }
 
     private fun Throwable.toUserMessage(): String = when {
-        this is HttpException && code() == 502 ->
-            "Provider pembayaran QRIS sedang gangguan. Coba lagi nanti."
+        this is HttpException && code() in listOf(502, 522, 523, 524) ->
+            "Provider pembayaran QRIS sedang tidak bisa dihubungi. Coba lagi nanti."
         this is HttpException && code() in 500..599 ->
             "Server sedang bermasalah (${code()}). Coba lagi nanti."
         this is IOException ->
