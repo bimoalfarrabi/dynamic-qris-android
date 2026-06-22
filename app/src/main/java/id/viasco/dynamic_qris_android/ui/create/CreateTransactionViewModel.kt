@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,7 +68,7 @@ class CreateTransactionViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isSubmitting = false,
-                            errorMessage = e.message ?: "Gagal membuat transaksi",
+                            errorMessage = e.toUserMessage(),
                         )
                     }
                 },
@@ -76,5 +78,15 @@ class CreateTransactionViewModel @Inject constructor(
 
     fun consumeCreated() {
         _state.update { it.copy(created = null) }
+    }
+
+    private fun Throwable.toUserMessage(): String = when {
+        this is HttpException && code() == 502 ->
+            "Provider pembayaran QRIS sedang gangguan. Coba lagi nanti."
+        this is HttpException && code() in 500..599 ->
+            "Server sedang bermasalah (${code()}). Coba lagi nanti."
+        this is IOException ->
+            "Tidak bisa terhubung ke server. Periksa koneksi Anda."
+        else -> message ?: "Gagal membuat transaksi"
     }
 }
