@@ -1,5 +1,9 @@
 package id.viasco.dynamic_qris_android.ui.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,11 +17,25 @@ import id.viasco.dynamic_qris_android.ui.history.HistoryScreen
 import id.viasco.dynamic_qris_android.ui.qr.QrDisplayScreen
 import id.viasco.dynamic_qris_android.ui.status.ConnectionStatusScreen
 
+private const val TRANSITION_DURATION = 300
+
 @Composable
 fun AppNavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = Screen.History.route,
+        enterTransition = {
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(TRANSITION_DURATION)) + fadeIn(tween(TRANSITION_DURATION))
+        },
+        exitTransition = {
+            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(TRANSITION_DURATION)) + fadeOut(tween(TRANSITION_DURATION))
+        },
+        popEnterTransition = {
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End, tween(TRANSITION_DURATION)) + fadeIn(tween(TRANSITION_DURATION))
+        },
+        popExitTransition = {
+            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, tween(TRANSITION_DURATION)) + fadeOut(tween(TRANSITION_DURATION))
+        },
     ) {
         composable(Screen.History.route) {
             HistoryScreen(
