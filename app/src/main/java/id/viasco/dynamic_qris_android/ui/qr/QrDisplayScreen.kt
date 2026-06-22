@@ -53,6 +53,7 @@ import id.viasco.dynamic_qris_android.ui.common.formatRemaining
 import id.viasco.dynamic_qris_android.ui.common.formatRupiah
 import kotlinx.coroutines.delay
 import java.time.Instant
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -231,7 +232,7 @@ private fun ExpiryCountdown(deadline: Instant) {
     LaunchedEffect(deadline) {
         while (true) {
             now = Instant.now()
-            delay(1_000)
+            delay(1.seconds)
         }
     }
     Text(

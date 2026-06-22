@@ -8,6 +8,7 @@ import id.viasco.dynamic_qris_android.data.repository.TransactionRepository
 import id.viasco.dynamic_qris_android.data.repository.TransactionRepositoryImpl
 import javax.inject.Singleton
 
+@Suppress("unused")
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
