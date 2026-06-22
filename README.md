@@ -1,5 +1,13 @@
 # 💳 Dynamic QRIS — Android
 
+![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white)
+![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-BOM_2024.12-4285F4?logo=jetpackcompose&logoColor=white)
+![Material 3](https://img.shields.io/badge/Material_3-Dynamic_Color-006A6A?logo=materialdesign&logoColor=white)
+![Hilt](https://img.shields.io/badge/Hilt-2.53-34A853?logo=google&logoColor=white)
+![Retrofit](https://img.shields.io/badge/Retrofit-2.11-48B983?logo=square&logoColor=white)
+![Room](https://img.shields.io/badge/Room-2.6-4285F4?logo=android&logoColor=white)
+![Min SDK](https://img.shields.io/badge/Min_SDK-31_(Android_12)-3DDC84?logo=android&logoColor=white)
+
 > Android app untuk generate & monitor QRIS dinamis. Kotlin + Jetpack Compose + Material 3.
 
 ```
