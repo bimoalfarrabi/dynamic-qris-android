@@ -94,11 +94,7 @@ class MainActivity : FragmentActivity() {
 @Composable
 private fun MainApp() {
     val navController = rememberNavController()
-    Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            AppNavHost(navController = navController)
-        }
-    }
+    AppNavHost(navController = navController)
 }
 
 @Composable
