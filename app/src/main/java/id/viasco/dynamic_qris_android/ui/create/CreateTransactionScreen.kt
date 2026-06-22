@@ -117,7 +117,7 @@ fun CreateTransactionScreen(
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 } else {
                     Text(stringResource(R.string.create_submit))
