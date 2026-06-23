@@ -53,8 +53,3 @@ data class CreateTransactionRequest(
     @SerialName("expiry_minutes") val expiryMinutes: Int = 5,
 )
 
-@Serializable
-data class ErrorResponse(
-    val message: String? = null,
-    val errors: Map<String, List<String>>? = null,
-)
