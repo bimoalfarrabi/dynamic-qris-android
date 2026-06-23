@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -27,6 +28,7 @@ class HistoryViewModel @Inject constructor(
         val filter: TransactionStatus? = null,
         val isRefreshing: Boolean = false,
         val errorMessage: String? = null,
+        val sortAscending: Boolean = false,
     )
 
     private val _state = MutableStateFlow(State())
@@ -36,8 +38,21 @@ class HistoryViewModel @Inject constructor(
         .flatMapLatest { repository.observeAll(it.filter) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val sortedTransactions: StateFlow<List<Transaction>> = combine(
+        transactions,
+        _state,
+    ) { list, state ->
+        // ponytail: sort in-memory, DB always returns DESC; cheap for personal-scale data
+        if (state.sortAscending) list.sortedBy { it.createdAt }
+        else list.sortedByDescending { it.createdAt }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     init {
         refresh()
+    }
+
+    fun toggleSort() {
+        _state.update { it.copy(sortAscending = !it.sortAscending) }
     }
 
     fun setFilter(status: TransactionStatus?) {
