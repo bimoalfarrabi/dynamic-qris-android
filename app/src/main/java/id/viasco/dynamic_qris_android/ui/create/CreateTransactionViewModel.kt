@@ -22,7 +22,7 @@ class CreateTransactionViewModel @Inject constructor(
     data class State(
         val amountText: String = "",
         val externalId: String = "",
-        val expiryMinutesText: String = "15",
+        val expiryMinutesText: String = "5",
         val isSubmitting: Boolean = false,
         val errorMessage: String? = null,
         val created: Transaction? = null,
@@ -52,7 +52,7 @@ class CreateTransactionViewModel @Inject constructor(
             _state.update { it.copy(errorMessage = "Jumlah minimal Rp 1.000") }
             return
         }
-        val expiry = current.expiryMinutesText.toIntOrNull() ?: 15
+        val expiry = current.expiryMinutesText.toIntOrNull() ?: 5
 
         _state.update { it.copy(isSubmitting = true, errorMessage = null) }
         viewModelScope.launch {

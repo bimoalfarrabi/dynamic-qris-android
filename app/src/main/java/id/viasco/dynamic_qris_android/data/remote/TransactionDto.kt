@@ -50,7 +50,7 @@ data class TransactionDto(
 data class CreateTransactionRequest(
     val amount: Long,
     @SerialName("external_id") val externalId: String? = null,
-    @SerialName("expiry_minutes") val expiryMinutes: Int = 15,
+    @SerialName("expiry_minutes") val expiryMinutes: Int = 5,
 )
 
 @Serializable
