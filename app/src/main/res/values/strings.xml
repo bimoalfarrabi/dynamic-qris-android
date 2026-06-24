@@ -61,6 +61,9 @@
     <string name="detail_paid_at">Dibayar</string>
     <string name="detail_cancelled_at">Dibatalkan</string>
 
+    <!-- QR Share -->
+    <string name="qr_share">Bagikan QRIS</string>
+
     <!-- Common -->
     <string name="error_network">Tidak bisa terhubung ke server. Periksa koneksi Anda.</string>
     <string name="error_unknown">Terjadi kesalahan. Coba lagi nanti.</string>

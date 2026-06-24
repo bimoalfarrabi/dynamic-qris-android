@@ -1,5 +1,7 @@
 package id.viasco.dynamic_qris_android.ui.qr
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,9 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.viasco.dynamic_qris_android.R
@@ -52,6 +57,7 @@ import id.viasco.dynamic_qris_android.ui.common.StatusChip
 import id.viasco.dynamic_qris_android.ui.common.formatRemaining
 import id.viasco.dynamic_qris_android.ui.common.formatRupiah
 import kotlinx.coroutines.delay
+import java.io.File
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 
@@ -64,6 +70,7 @@ fun QrDisplayScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val transaction = state.transaction
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -73,6 +80,30 @@ fun QrDisplayScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                    }
+                },
+                actions = {
+                    val qrisString = transaction?.qrisString
+                    if (qrisString != null) {
+                        IconButton(onClick = {
+                            val bitmap = QrEncoder.encodeBitmap(qrisString) ?: return@IconButton
+                            val qrDir = File(context.cacheDir, "qr").also { it.mkdirs() }
+                            val file = File(qrDir, "qris_${transaction.id.take(8)}.png")
+                            file.outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+                            val uri: Uri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                file,
+                            )
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(Intent.createChooser(intent, context.getString(R.string.qr_share)))
+                        }) {
+                            Icon(Icons.Default.Share, contentDescription = stringResource(R.string.qr_share))
+                        }
                     }
                 },
                 scrollBehavior = scrollBehavior,
