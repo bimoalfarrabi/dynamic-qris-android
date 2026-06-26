@@ -1,10 +1,15 @@
 package id.viasco.dynamic_qris_android.ui.common
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import id.viasco.dynamic_qris_android.R
 
 object NotificationHelper {
@@ -120,10 +125,16 @@ object NotificationHelper {
 
     private fun setWasDown(context: Context, key: String, value: Boolean) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().putBoolean(key, value).apply()
+            .edit { putBoolean(key, value) }
     }
 
     private fun notify(context: Context, id: Int, title: String, body: String) {
+        // Android 13+ requires POST_NOTIFICATIONS permission at runtime
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+        ) return
+
         val notif = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
