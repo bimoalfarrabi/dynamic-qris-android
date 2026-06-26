@@ -1,12 +1,15 @@
 package id.viasco.dynamic_qris_android.ui.qr
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import id.viasco.dynamic_qris_android.data.repository.TransactionRepository
 import id.viasco.dynamic_qris_android.domain.model.Transaction
 import id.viasco.dynamic_qris_android.domain.model.TransactionStatus
+import id.viasco.dynamic_qris_android.ui.common.NotificationHelper
 import id.viasco.dynamic_qris_android.ui.navigation.Screen
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -26,6 +29,7 @@ private const val POLL_INTERVAL_MS = 3_000L
 class QrDisplayViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: TransactionRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     data class State(
@@ -66,6 +70,13 @@ class QrDisplayViewModel @Inject constructor(
                     onSuccess = { trx ->
                         _ui.update { it.copy(transaction = trx, errorMessage = null) }
                         if (trx.status.isTerminal) {
+                            if (trx.status == TransactionStatus.SUCCESS) {
+                                val amount = trx.amountTotal ?: trx.amountRequested
+                                NotificationHelper.notifyPaymentSuccess(
+                                    context,
+                                    "Rp %,d".format(amount).replace(',', '.'),
+                                )
+                            }
                             return@launch
                         }
                     },
