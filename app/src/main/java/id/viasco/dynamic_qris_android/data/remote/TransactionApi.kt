@@ -12,10 +12,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class QrisifyStatusDto(
     val ok: Boolean,
-    val statusCode: Int?,
-    val responseTimeMs: Int,
-    val error: String?,
-    val checkedAt: String,
+    val statusCode: Int? = null,
+    val responseTimeMs: Int = 0,
+    val error: String? = null,
+    val checkedAt: String = "",
 )
 
 interface TransactionApi {
