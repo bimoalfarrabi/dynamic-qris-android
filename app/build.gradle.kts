@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "id.viasco.dynamic_qris_android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "id.viasco.dynamic_qris_android"
         minSdk = 31
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -42,8 +42,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
     buildFeatures {
         compose = true
