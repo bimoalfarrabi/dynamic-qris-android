@@ -6,6 +6,18 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+import kotlinx.serialization.Serializable
+
+// ponytail: inline DTO here, no separate file for a one-field response
+@Serializable
+data class QrisifyStatusDto(
+    val ok: Boolean,
+    val statusCode: Int?,
+    val responseTimeMs: Int,
+    val error: String?,
+    val checkedAt: String,
+)
+
 interface TransactionApi {
 
     @GET("transactions")
@@ -29,4 +41,8 @@ interface TransactionApi {
     /** Simple ping to verify backend connectivity. */
     @GET("health")
     suspend fun health()
+
+    /** Check QRIS-ify API connectivity via Laravel proxy. */
+    @GET("status/qrisify")
+    suspend fun qrisifyStatus(): QrisifyStatusDto
 }

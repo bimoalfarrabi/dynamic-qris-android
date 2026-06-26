@@ -1,5 +1,6 @@
 package id.viasco.dynamic_qris_android.data.repository
 
+import id.viasco.dynamic_qris_android.data.remote.QrisifyStatusDto
 import id.viasco.dynamic_qris_android.domain.model.Transaction
 import id.viasco.dynamic_qris_android.domain.model.TransactionStatus
 import kotlinx.coroutines.flow.Flow
@@ -14,4 +15,5 @@ interface TransactionRepository {
     suspend fun create(amount: Long, externalId: String?, expiryMinutes: Int): Result<Transaction>
     suspend fun cancel(id: String): Result<Transaction>
     suspend fun healthCheck(): Result<Unit>
+    suspend fun checkQrisify(): Result<QrisifyStatusDto>
 }

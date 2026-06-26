@@ -4,6 +4,7 @@ import id.viasco.dynamic_qris_android.data.local.TransactionDao
 import id.viasco.dynamic_qris_android.data.mapper.toDomain
 import id.viasco.dynamic_qris_android.data.mapper.toEntity
 import id.viasco.dynamic_qris_android.data.remote.CreateTransactionRequest
+import id.viasco.dynamic_qris_android.data.remote.QrisifyStatusDto
 import id.viasco.dynamic_qris_android.data.remote.TransactionApi
 import id.viasco.dynamic_qris_android.domain.model.Transaction
 import id.viasco.dynamic_qris_android.domain.model.TransactionStatus
@@ -66,5 +67,9 @@ class TransactionRepositoryImpl @Inject constructor(
 
     override suspend fun healthCheck(): Result<Unit> = runCatching {
         api.health()
+    }
+
+    override suspend fun checkQrisify(): Result<QrisifyStatusDto> = runCatching {
+        api.qrisifyStatus()
     }
 }
