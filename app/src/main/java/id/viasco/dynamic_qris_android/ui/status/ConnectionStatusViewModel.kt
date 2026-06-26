@@ -1,10 +1,13 @@
 package id.viasco.dynamic_qris_android.ui.status
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import id.viasco.dynamic_qris_android.data.remote.QrisifyStatusDto
 import id.viasco.dynamic_qris_android.data.repository.TransactionRepository
+import id.viasco.dynamic_qris_android.ui.common.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ConnectionStatusViewModel @Inject constructor(
     private val repository: TransactionRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     data class State(
@@ -30,6 +34,7 @@ class ConnectionStatusViewModel @Inject constructor(
     val state: StateFlow<State> = _state.asStateFlow()
 
     init {
+        NotificationHelper.createChannel(context)
         check()
     }
 
@@ -40,6 +45,7 @@ class ConnectionStatusViewModel @Inject constructor(
             repository.healthCheck().fold(
                 onSuccess = {
                     val elapsed = System.currentTimeMillis() - start
+                    NotificationHelper.handleLaravelUp(context)
                     _state.update {
                         it.copy(
                             isChecking = false,
@@ -50,6 +56,7 @@ class ConnectionStatusViewModel @Inject constructor(
                     }
                 },
                 onFailure = { e ->
+                    NotificationHelper.handleLaravelDown(context)
                     _state.update {
                         it.copy(
                             isChecking = false,
@@ -64,9 +71,12 @@ class ConnectionStatusViewModel @Inject constructor(
         viewModelScope.launch {
             repository.checkQrisify().fold(
                 onSuccess = { dto ->
+                    if (dto.ok) NotificationHelper.handleQrisifyUp(context)
+                    else NotificationHelper.handleQrisifyDown(context)
                     _state.update { it.copy(isCheckingQrisify = false, qrisify = dto) }
                 },
                 onFailure = { e ->
+                    NotificationHelper.handleQrisifyDown(context)
                     _state.update {
                         it.copy(
                             isCheckingQrisify = false,

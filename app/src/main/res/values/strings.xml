@@ -70,6 +70,20 @@
     <string name="retry">Coba Lagi</string>
     <string name="loading">Memuat…</string>
 
+    <!-- Notifications -->
+    <string name="notif_laravel_down_title">Server Tidak Terhubung</string>
+    <string name="notif_laravel_down_body">Laravel backend tidak dapat dijangkau. Periksa koneksi Anda.</string>
+    <string name="notif_laravel_still_down_body">Server masih belum dapat dijangkau. Transaksi baru tidak akan bisa dibuat.</string>
+    <string name="notif_laravel_up_title">Server Kembali Normal</string>
+    <string name="notif_laravel_up_body">Laravel backend sudah dapat dijangkau kembali.</string>
+    <string name="notif_qrisify_down_title">QRIS-ify Tidak Tersedia</string>
+    <string name="notif_qrisify_down_body">Layanan QRIS-ify sedang bermasalah. Transaksi baru mungkin gagal.</string>
+    <string name="notif_qrisify_still_down_body">QRIS-ify masih tidak tersedia. Pembuatan QRIS baru belum bisa dilakukan.</string>
+    <string name="notif_qrisify_up_title">QRIS-ify Kembali Normal</string>
+    <string name="notif_qrisify_up_body">Layanan QRIS-ify sudah pulih. Transaksi kembali normal.</string>
+    <string name="notif_payment_success_title">Pembayaran Diterima!</string>
+    <string name="notif_payment_success_body">Transaksi sebesar %1$s berhasil dibayar.</string>
+
     <!-- Connection Status -->
     <string name="status_title">Status Koneksi</string>
     <string name="status_checking">Memeriksa koneksi…</string>
