@@ -1,5 +1,6 @@
 package id.viasco.dynamic_qris_android.data.remote
 
+import kotlinx.serialization.SerialName
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -12,10 +13,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class QrisifyStatusDto(
     val ok: Boolean,
-    val statusCode: Int? = null,
-    val responseTimeMs: Int = 0,
+    @SerialName("status_code") val statusCode: Int? = null,
+    @SerialName("response_time_ms") val responseTimeMs: Int = 0,
     val error: String? = null,
-    val checkedAt: String = "",
+    @SerialName("checked_at") val checkedAt: String = "",
 )
 
 interface TransactionApi {
