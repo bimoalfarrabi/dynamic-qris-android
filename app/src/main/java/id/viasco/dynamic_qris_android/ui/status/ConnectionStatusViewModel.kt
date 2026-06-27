@@ -21,6 +21,8 @@ class ConnectionStatusViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
+    enum class OverallStatus { UNKNOWN, ALL_UP, PARTIAL, ALL_DOWN }
+
     data class State(
         val isChecking: Boolean = false,
         val isConnected: Boolean? = null,
@@ -28,7 +30,15 @@ class ConnectionStatusViewModel @Inject constructor(
         val responseTimeMs: Long? = null,
         val qrisify: QrisifyStatusDto? = null,
         val isCheckingQrisify: Boolean = false,
-    )
+    ) {
+        val overallStatus: OverallStatus get() = when {
+            isChecking || isCheckingQrisify -> OverallStatus.UNKNOWN
+            isConnected == null || qrisify == null -> OverallStatus.UNKNOWN
+            isConnected == true && qrisify.ok -> OverallStatus.ALL_UP
+            isConnected == false && !qrisify.ok -> OverallStatus.ALL_DOWN
+            else -> OverallStatus.PARTIAL
+        }
+    }
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()

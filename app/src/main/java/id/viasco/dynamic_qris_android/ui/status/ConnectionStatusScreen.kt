@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -95,11 +96,11 @@ fun ConnectionStatusScreen(
         ) {
             // Status indicator
             StatusIndicator(
-                isChecking = state.isChecking,
-                isConnected = state.isConnected,
+                isChecking = state.isChecking || state.isCheckingQrisify,
+                overallStatus = state.overallStatus,
             )
 
-            // Info card
+            // Info card (Laravel)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -111,6 +112,35 @@ fun ConnectionStatusScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "Laravel API",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        when {
+                            state.isChecking -> CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                            )
+                            state.isConnected == true -> Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp),
+                            )
+                            state.isConnected == false -> Icon(
+                                Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
                     InfoRow(
                         label = stringResource(R.string.status_server),
                         value = BuildConfig.API_BASE_URL,
@@ -212,7 +242,7 @@ fun ConnectionStatusScreen(
 @Composable
 private fun StatusIndicator(
     isChecking: Boolean,
-    isConnected: Boolean?,
+    overallStatus: ConnectionStatusViewModel.OverallStatus,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -228,32 +258,39 @@ private fun StatusIndicator(
                     strokeWidth = 4.dp,
                 )
             } else {
-                val dotColor by animateColorAsState(
-                    targetValue = when (isConnected) {
-                        true -> MaterialTheme.colorScheme.primary
-                        false -> MaterialTheme.colorScheme.error
-                        null -> MaterialTheme.colorScheme.outlineVariant
+                val iconColor by animateColorAsState(
+                    targetValue = when (overallStatus) {
+                        ConnectionStatusViewModel.OverallStatus.ALL_UP -> MaterialTheme.colorScheme.primary
+                        ConnectionStatusViewModel.OverallStatus.PARTIAL -> MaterialTheme.colorScheme.tertiary
+                        ConnectionStatusViewModel.OverallStatus.ALL_DOWN -> MaterialTheme.colorScheme.error
+                        ConnectionStatusViewModel.OverallStatus.UNKNOWN -> MaterialTheme.colorScheme.outlineVariant
                     },
                     label = "statusColor",
                 )
-                when (isConnected) {
-                    true -> Icon(
+                when (overallStatus) {
+                    ConnectionStatusViewModel.OverallStatus.ALL_UP -> Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = dotColor,
+                        tint = iconColor,
                     )
-                    false -> Icon(
+                    ConnectionStatusViewModel.OverallStatus.PARTIAL -> Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = iconColor,
+                    )
+                    ConnectionStatusViewModel.OverallStatus.ALL_DOWN -> Icon(
                         imageVector = Icons.Default.Error,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = dotColor,
+                        tint = iconColor,
                     )
-                    null -> Box(
+                    ConnectionStatusViewModel.OverallStatus.UNKNOWN -> Box(
                         modifier = Modifier
                             .size(24.dp)
                             .clip(CircleShape)
-                            .background(dotColor),
+                            .background(iconColor),
                     )
                 }
             }
@@ -262,8 +299,9 @@ private fun StatusIndicator(
         Text(
             text = when {
                 isChecking -> stringResource(R.string.status_checking)
-                isConnected == true -> stringResource(R.string.status_connected)
-                isConnected == false -> stringResource(R.string.status_disconnected)
+                overallStatus == ConnectionStatusViewModel.OverallStatus.ALL_UP -> stringResource(R.string.status_connected)
+                overallStatus == ConnectionStatusViewModel.OverallStatus.PARTIAL -> stringResource(R.string.status_partial)
+                overallStatus == ConnectionStatusViewModel.OverallStatus.ALL_DOWN -> stringResource(R.string.status_disconnected)
                 else -> stringResource(R.string.status_unknown)
             },
             style = MaterialTheme.typography.titleMedium,

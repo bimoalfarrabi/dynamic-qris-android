@@ -87,8 +87,9 @@
     <!-- Connection Status -->
     <string name="status_title">Status Koneksi</string>
     <string name="status_checking">Memeriksa koneksi…</string>
-    <string name="status_connected">Laravel Terhubung</string>
-    <string name="status_disconnected">Laravel Tidak Terhubung</string>
+    <string name="status_connected">Terhubung</string>
+    <string name="status_partial">Sebagian Terhubung</string>
+    <string name="status_disconnected">Tidak Terhubung</string>
     <string name="status_unknown">Belum Diperiksa</string>
     <string name="status_server">Server</string>
     <string name="status_response_time">Waktu Respons</string>
