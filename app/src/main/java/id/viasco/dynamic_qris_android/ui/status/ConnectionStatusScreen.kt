@@ -197,7 +197,7 @@ fun ConnectionStatusScreen(
                             fontWeight = FontWeight.SemiBold,
                         )
                         when {
-                            isCheckingQrisify -> CircularProgressIndicator(
+                            state.isChecking -> CircularProgressIndicator(
                                 modifier = Modifier.size(16.dp),
                                 strokeWidth = 2.dp,
                             )
