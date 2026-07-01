@@ -44,84 +44,83 @@ object NotificationHelper {
         )
     }
 
-    /**
-     * - Jika notif sebelumnya belum di-dismiss user → skip (avoid spam).
-     * - Jika sudah di-dismiss (atau belum pernah notif) → kirim.
-     * - Notif pertama: "down". Notif berikutnya (masih down): "masih down".
-     */
-    fun handleLaravelDown(context: Context) {
-        if (!isNotifActive(context, NOTIF_ID_LARAVEL)) {
-            val wasDown = wasDown(context, KEY_LARAVEL_WAS_DOWN)
-            notify(
-                context,
-                NOTIF_ID_LARAVEL,
-                context.getString(R.string.notif_laravel_down_title),
-                if (wasDown) context.getString(R.string.notif_laravel_still_down_body)
-                else context.getString(R.string.notif_laravel_down_body),
-            )
-        }
-        setWasDown(context, KEY_LARAVEL_WAS_DOWN, true)
-    }
+    fun handleLaravelDown(context: Context) = handleDown(
+        context,
+        notifId = NOTIF_ID_LARAVEL,
+        wasDownKey = KEY_LARAVEL_WAS_DOWN,
+        title = context.getString(R.string.notif_laravel_down_title),
+        firstBody = context.getString(R.string.notif_laravel_down_body),
+        stillBody = context.getString(R.string.notif_laravel_still_down_body),
+    )
+
+    fun handleLaravelUp(context: Context) = handleUp(
+        context,
+        notifId = NOTIF_ID_LARAVEL,
+        wasDownKey = KEY_LARAVEL_WAS_DOWN,
+        title = context.getString(R.string.notif_laravel_up_title),
+        body = context.getString(R.string.notif_laravel_up_body),
+    )
+
+    fun handleQrisifyDown(context: Context) = handleDown(
+        context,
+        notifId = NOTIF_ID_QRISIFY,
+        wasDownKey = KEY_QRISIFY_WAS_DOWN,
+        title = context.getString(R.string.notif_qrisify_down_title),
+        firstBody = context.getString(R.string.notif_qrisify_down_body),
+        stillBody = context.getString(R.string.notif_qrisify_still_down_body),
+    )
+
+    fun handleQrisifyUp(context: Context) = handleUp(
+        context,
+        notifId = NOTIF_ID_QRISIFY,
+        wasDownKey = KEY_QRISIFY_WAS_DOWN,
+        title = context.getString(R.string.notif_qrisify_up_title),
+        body = context.getString(R.string.notif_qrisify_up_body),
+    )
+
+    // --- private helpers ---
 
     /**
-     * Dipanggil saat QRIS-ify down.
-     * Sama seperti handleLaravelDown.
+     * Kirim notif "down" dengan anti-spam:
+     * - Skip jika notif sebelumnya belum di-dismiss user.
+     * - Teks berbeda untuk first-down vs still-down.
      */
-    fun handleQrisifyDown(context: Context) {
-        if (!isNotifActive(context, NOTIF_ID_QRISIFY)) {
-            val wasDown = wasDown(context, KEY_QRISIFY_WAS_DOWN)
-            notify(
-                context,
-                NOTIF_ID_QRISIFY,
-                context.getString(R.string.notif_qrisify_down_title),
-                if (wasDown) context.getString(R.string.notif_qrisify_still_down_body)
-                else context.getString(R.string.notif_qrisify_down_body),
-            )
+    private fun handleDown(
+        context: Context,
+        notifId: Int,
+        wasDownKey: String,
+        title: String,
+        firstBody: String,
+        stillBody: String,
+    ) {
+        if (!isNotifActive(context, notifId)) {
+            notify(context, notifId, title, if (wasDown(context, wasDownKey)) stillBody else firstBody)
         }
-        setWasDown(context, KEY_QRISIFY_WAS_DOWN, true)
+        setWasDown(context, wasDownKey, true)
     }
 
-    /**
-     * Dipanggil saat Laravel up.
-     * Kirim notif "up" sekali hanya jika sebelumnya down — tidak ikut jadwal 1 jam.
-     */
-    fun handleLaravelUp(context: Context) {
-        if (wasDown(context, KEY_LARAVEL_WAS_DOWN)) {
-            NotificationManagerCompat.from(context).cancel(NOTIF_ID_LARAVEL)
-            notify(
-                context,
-                NOTIF_ID_LARAVEL,
-                context.getString(R.string.notif_laravel_up_title),
-                context.getString(R.string.notif_laravel_up_body),
-            )
-            setWasDown(context, KEY_LARAVEL_WAS_DOWN, false)
+    /** Kirim notif "up" hanya jika sebelumnya pernah down. */
+    private fun handleUp(
+        context: Context,
+        notifId: Int,
+        wasDownKey: String,
+        title: String,
+        body: String,
+    ) {
+        if (wasDown(context, wasDownKey)) {
+            NotificationManagerCompat.from(context).cancel(notifId)
+            notify(context, notifId, title, body)
         }
+        setWasDown(context, wasDownKey, false)
     }
 
-    /**
-     * Dipanggil saat QRIS-ify up.
-     * Sama seperti handleLaravelUp.
-     */
-    fun handleQrisifyUp(context: Context) {
-        if (wasDown(context, KEY_QRISIFY_WAS_DOWN)) {
-            NotificationManagerCompat.from(context).cancel(NOTIF_ID_QRISIFY)
-            notify(
-                context,
-                NOTIF_ID_QRISIFY,
-                context.getString(R.string.notif_qrisify_up_title),
-                context.getString(R.string.notif_qrisify_up_body),
-            )
-            setWasDown(context, KEY_QRISIFY_WAS_DOWN, false)
-        }
-    }
-
-    // ponytail: activeNotifications tersedia sejak API 23, minSdk=31, aman
     private fun isNotifActive(context: Context, notifId: Int): Boolean =
-        context.getSystemService(NotificationManager::class.java)
-            .activeNotifications.any { it.id == notifId }
+        NotificationManagerCompat.from(context).activeNotifications
+            .any { it.id == notifId }
 
     private fun wasDown(context: Context, key: String): Boolean =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(key, false)
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getBoolean(key, false)
 
     private fun setWasDown(context: Context, key: String, value: Boolean) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

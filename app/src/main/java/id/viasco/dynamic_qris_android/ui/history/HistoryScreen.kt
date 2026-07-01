@@ -55,6 +55,7 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val sortAscending by viewModel.sortAscending.collectAsStateWithLifecycle()
     val transactions by viewModel.sortedTransactions.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -69,8 +70,8 @@ fun HistoryScreen(
                     }
                     IconButton(onClick = viewModel::toggleSort) {
                         Icon(
-                            imageVector = if (state.sortAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                            contentDescription = if (state.sortAscending) "Terlama" else "Terbaru",
+                            imageVector = if (sortAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                            contentDescription = if (sortAscending) "Terlama" else "Terbaru",
                         )
                     }
                     IconButton(onClick = viewModel::refresh) {

@@ -28,11 +28,14 @@ class HistoryViewModel @Inject constructor(
         val filter: TransactionStatus? = null,
         val isRefreshing: Boolean = false,
         val errorMessage: String? = null,
-        val sortAscending: Boolean = false,
     )
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
+
+    // Separate flow so sort toggles don't re-trigger flatMapLatest / Room queries.
+    private val _sortAscending = MutableStateFlow(false)
+    val sortAscending: StateFlow<Boolean> = _sortAscending.asStateFlow()
 
     val transactions: StateFlow<List<Transaction>> = _state
         .flatMapLatest { repository.observeAll(it.filter) }
@@ -40,11 +43,10 @@ class HistoryViewModel @Inject constructor(
 
     val sortedTransactions: StateFlow<List<Transaction>> = combine(
         transactions,
-        _state,
-    ) { list, state ->
+        _sortAscending,
+    ) { list, asc ->
         // ponytail: sort in-memory, DB always returns DESC; cheap for personal-scale data
-        if (state.sortAscending) list.sortedBy { it.createdAt }
-        else list.sortedByDescending { it.createdAt }
+        if (asc) list.sortedBy { it.createdAt } else list.sortedByDescending { it.createdAt }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     init {
@@ -52,7 +54,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun toggleSort() {
-        _state.update { it.copy(sortAscending = !it.sortAscending) }
+        _sortAscending.update { !it }
     }
 
     fun setFilter(status: TransactionStatus?) {

@@ -14,10 +14,8 @@ import id.viasco.dynamic_qris_android.ui.navigation.Screen
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -46,44 +44,35 @@ class QrDisplayViewModel @Inject constructor(
     private val _ui = MutableStateFlow(State())
     val state: StateFlow<State> = _ui.asStateFlow()
 
-    /** Observe local cache; ViewModel keeps the canonical [transaction] copy in [_ui]. */
-    val cached: StateFlow<Transaction?> = repository.observeById(transactionId)
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     private var pollJob: Job? = null
 
     init {
-        // Seed initial state from cache, then start polling.
+        // Observe Room directly — emits cached value immediately, then on every poll upsert.
         viewModelScope.launch {
-            repository.getCached(transactionId)?.let { cached ->
-                _ui.update { it.copy(transaction = cached) }
+            repository.observeById(transactionId).collect { trx ->
+                _ui.update { it.copy(transaction = trx) }
             }
-            startPolling()
         }
+        startPolling()
     }
 
     private fun startPolling() {
         pollJob?.cancel()
         pollJob = viewModelScope.launch {
             while (isActive) {
-                repository.refreshById(transactionId).fold(
-                    onSuccess = { trx ->
-                        _ui.update { it.copy(transaction = trx, errorMessage = null) }
-                        if (trx.status.isTerminal) {
-                            if (trx.status == TransactionStatus.SUCCESS) {
-                                val amount = trx.amountTotal ?: trx.amountRequested
-                                NotificationHelper.notifyPaymentSuccess(
-                                    context,
-                                    "Rp %,d".format(amount).replace(',', '.'),
-                                )
-                            }
-                            return@launch
+                val result = repository.refreshById(transactionId)
+                result.onSuccess { trx ->
+                    if (trx.status.isTerminal) {
+                        if (trx.status == TransactionStatus.SUCCESS) {
+                            NotificationHelper.notifyPaymentSuccess(
+                                context,
+                                trx.amountTotal?.toString() ?: trx.amountRequested.toString(),
+                            )
                         }
-                    },
-                    onFailure = { e ->
-                        _ui.update { it.copy(errorMessage = e.message) }
-                    },
-                )
+                        pollJob?.cancel()
+                        return@launch
+                    }
+                }
                 delay(POLL_INTERVAL_MS)
             }
         }

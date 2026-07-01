@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import id.viasco.dynamic_qris_android.data.remote.QrisifyStatusDto
 import id.viasco.dynamic_qris_android.data.repository.TransactionRepository
 import id.viasco.dynamic_qris_android.ui.common.NotificationHelper
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,10 +30,9 @@ class ConnectionStatusViewModel @Inject constructor(
         val errorMessage: String? = null,
         val responseTimeMs: Long? = null,
         val qrisify: QrisifyStatusDto? = null,
-        val isCheckingQrisify: Boolean = false,
     ) {
         val overallStatus: OverallStatus get() = when {
-            isChecking || isCheckingQrisify -> OverallStatus.UNKNOWN
+            isChecking -> OverallStatus.UNKNOWN
             isConnected == null || qrisify == null -> OverallStatus.UNKNOWN
             isConnected == true && qrisify.ok -> OverallStatus.ALL_UP
             isConnected == false && !qrisify.ok -> OverallStatus.ALL_DOWN
@@ -49,58 +49,49 @@ class ConnectionStatusViewModel @Inject constructor(
     }
 
     fun check() {
-        _state.update { it.copy(isChecking = true, isCheckingQrisify = true, errorMessage = null) }
+        _state.update { it.copy(isChecking = true, errorMessage = null) }
         viewModelScope.launch {
             val start = System.currentTimeMillis()
-            repository.healthCheck().fold(
-                onSuccess = {
-                    val elapsed = System.currentTimeMillis() - start
-                    NotificationHelper.handleLaravelUp(context)
-                    _state.update {
-                        it.copy(
-                            isChecking = false,
-                            isConnected = true,
-                            responseTimeMs = elapsed,
-                            errorMessage = null,
-                        )
-                    }
-                },
-                onFailure = { e ->
-                    NotificationHelper.handleLaravelDown(context)
-                    _state.update {
-                        it.copy(
-                            isChecking = false,
-                            isConnected = false,
-                            responseTimeMs = null,
-                            errorMessage = e.message,
-                        )
-                    }
-                },
+
+            // Run both checks in parallel.
+            val laravelDeferred = async { repository.healthCheck() }
+            val qrisifyDeferred = async { repository.checkQrisify() }
+
+            val laravelResult = laravelDeferred.await()
+            val qrisifyResult = qrisifyDeferred.await()
+
+            val elapsed = System.currentTimeMillis() - start
+
+            laravelResult.fold(
+                onSuccess = { NotificationHelper.handleLaravelUp(context) },
+                onFailure = { NotificationHelper.handleLaravelDown(context) },
             )
-        }
-        viewModelScope.launch {
-            repository.checkQrisify().fold(
+
+            qrisifyResult.fold(
                 onSuccess = { dto ->
                     if (dto.ok) NotificationHelper.handleQrisifyUp(context)
                     else NotificationHelper.handleQrisifyDown(context)
-                    _state.update { it.copy(isCheckingQrisify = false, qrisify = dto) }
                 },
-                onFailure = { e ->
-                    NotificationHelper.handleQrisifyDown(context)
-                    _state.update {
-                        it.copy(
-                            isCheckingQrisify = false,
-                            qrisify = QrisifyStatusDto(
-                                ok = false,
-                                statusCode = null,
-                                responseTimeMs = 0,
-                                error = e.message,
-                                checkedAt = "",
-                            ),
-                        )
-                    }
-                },
+                onFailure = { NotificationHelper.handleQrisifyDown(context) },
             )
+
+            _state.update {
+                it.copy(
+                    isChecking = false,
+                    isConnected = laravelResult.isSuccess,
+                    responseTimeMs = if (laravelResult.isSuccess) elapsed else null,
+                    errorMessage = laravelResult.exceptionOrNull()?.message,
+                    qrisify = qrisifyResult.getOrElse { e ->
+                        QrisifyStatusDto(
+                            ok = false,
+                            statusCode = null,
+                            responseTimeMs = 0,
+                            error = e.message,
+                            checkedAt = "",
+                        )
+                    },
+                )
+            }
         }
     }
 }

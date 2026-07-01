@@ -17,6 +17,11 @@ import id.viasco.dynamic_qris_android.ui.status.ConnectionStatusScreen
 
 private const val TRANSITION_DURATION = 300
 
+/** Routes a transaction to its correct destination based on status. */
+private fun navRoute(status: TransactionStatus, transactionId: String): String =
+    if (status == TransactionStatus.PENDING) Screen.QrDisplay.createRoute(transactionId)
+    else Screen.Detail.createRoute(transactionId)
+
 @Composable
 fun AppNavHost(navController: NavHostController) {
     NavHost(
@@ -39,11 +44,7 @@ fun AppNavHost(navController: NavHostController) {
             HistoryScreen(
                 onCreate = { navController.navigate(Screen.Create.route) },
                 onItemClick = { trx ->
-                    if (trx.status == TransactionStatus.PENDING) {
-                        navController.navigate(Screen.QrDisplay.createRoute(trx.id))
-                    } else {
-                        navController.navigate(Screen.Detail.createRoute(trx.id))
-                    }
+                    navController.navigate(navRoute(trx.status, trx.id))
                 },
                 onStatusClick = { navController.navigate(Screen.ConnectionStatus.route) },
             )
@@ -53,9 +54,7 @@ fun AppNavHost(navController: NavHostController) {
             CreateTransactionScreen(
                 onBack = { navController.popBackStack() },
                 onCreated = { id ->
-                    navController.navigate(Screen.QrDisplay.createRoute(id)) {
-                        popUpTo(Screen.Create.route) { inclusive = true }
-                    }
+                    navController.navigate(Screen.QrDisplay.createRoute(id))
                 },
             )
         }

@@ -42,4 +42,4 @@ fun TransactionEntity.toDomain(): Transaction = Transaction(
     updatedAt = Instant.ofEpochMilli(updatedAt),
 )
 
-fun TransactionDto.toDomain(): Transaction = toEntity().toDomain()
+// ponytail: toDomain() on DTO was dead code — all callers go through toEntity().toDomain() directly.
