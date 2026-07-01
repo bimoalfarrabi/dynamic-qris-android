@@ -96,7 +96,7 @@ fun ConnectionStatusScreen(
         ) {
             // Status indicator
             StatusIndicator(
-                isChecking = state.isChecking || state.isCheckingQrisify,
+                isChecking = state.isChecking,
                 overallStatus = state.overallStatus,
             )
 
@@ -178,7 +178,6 @@ fun ConnectionStatusScreen(
 
             // QRIS-ify status card
             val qrisify = state.qrisify
-            val isCheckingQrisify = state.isCheckingQrisify
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
